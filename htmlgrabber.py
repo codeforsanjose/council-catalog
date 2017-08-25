@@ -4,6 +4,7 @@
 #  written/tested using python 2.7.12
 
 import sys
+import json
 import argparse
 from bs4 import BeautifulSoup
 from datetime import date, datetime
@@ -45,10 +46,10 @@ def grabHTML(minDate):
     """
     
     absoluteMinDate = datetime(year=2015, month=5, day=20)
-    minDate = min(minDate, absoluteMinDate)
+    minDate = max(minDate, absoluteMinDate)
         
     print("Scraping HTML agendas from after {} ...".format(str(minDate)))
-    agendaHTMLs = []
+    agendaHTMLs = {}
           
     for year, url in AGENDAURLS.items():
         if (year < minDate.year):
@@ -70,14 +71,14 @@ def grabHTML(minDate):
               meeting_date = dateutil.parser.parse(a_text, fuzzy=True)
               if meeting_date <= minDate:
                   continue
+              date_str = str(meeting_date)
             
               if (a_href.find("AgendaViewer") >= 0 and a_href.find(".pdf") == -1):
-                  print(str(meeting_date) + ": scraping " + a_href)
-                  agendaHTMLs.append(urlopen(a_href).read())
+                  print(date_str + ": scraping " + a_href)
+                  agendaHTMLs[date_str] = urlopen(a_href).read().decode('utf-8')
               else:
                   msg = "*** non-HTML agenda found: {}\t{}"
                   msg = msg.format(anchor.string, a_href)
-                  print(msg)
                       
                       
           except TypeError:
@@ -96,7 +97,7 @@ if __name__ == '__main__':
     import getopt
     d = datetime(year=2015, month=5, day=20)
     append = False
-    output = "htmlgrabber_output.txt"
+    output = "htmlgrabber_output.json"
     parser = argparse.ArgumentParser('Grab HTML content from council meetings')
     parser.add_argument('-d', '--date', help='Date in <YYYY/MM/DD> format',
                         default='2015/05/20')
@@ -109,15 +110,15 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     input_date = datetime.strptime(args.date, '%Y/%m/%d')
+    print(input_date)
 
-    agendas = grabHTML(d)
-    outputContent = ''.join(agendas)
-    for a in agendas:
-        outputContent += a
+    agendas = grabHTML(input_date)
     if append:
-        f = open(output, 'a')
-    else:
-        f = open(output, 'w')
-    f.write(outputContent)
-    f.close()
-    sys.exit()
+        with open(output, 'r') as f:
+            initial_data = json.load(f)
+            if not isinstance(initial_data, dict):
+                raise TypeError('Appending to none string')
+            initial_data.update(agendas)
+            agendas = initial_data
+    with open(output, 'w') as f:
+        json.dump(agendas, f)
