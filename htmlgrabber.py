@@ -83,6 +83,9 @@ def grabHTML(minDate):
           except TypeError:
               print('Experienced unexpected TypeError')
               pass
+          except ValueError:
+              print("Experienced non-parseable date")
+              pass
     
     print("\nDone!\n\n")
     return agendaHTMLs
@@ -94,27 +97,21 @@ if __name__ == '__main__':
     d = datetime(year=2015, month=5, day=20)
     append = False
     output = "htmlgrabber_output.txt"
-    
-    try: 
-        opts, args = getopt.getopt(sys.argv[1:],"hd:o:a")
-    except getopt.GetoptError:
-        print("Error - please use this format:\n\tpython htmlgrabber.py -d <YYYY/MM/DD> -o <outputfile.txt>")
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            #print("""\nhtmlgrabber.py - command line interface\n\n\Collects all html-based agendas from the San Jose City Council website\n\after the given date, and spits them out as a single, continuous text file\n\(raw html).\n\n\usage: htmlgrabber.py -d <YYYY/MM/DD> -o <outputfile.txt>\n\t\ -a :\tappends new HTML to the existing outputfile\n\n""")
-            sys.exit()
-        elif opt == '-d':
-            year = int(arg[0:4])
-            month = int(arg[5:7])
-            day = int(arg[8:])
-            d = datetime(year=year, month=month, day=day)
-        elif opt == '-o':
-            output = arg
-        elif opt == '-a':
-            append = True
+    parser = argparse.ArgumentParser('Grab HTML content from council meetings')
+    parser.add_argument('-d', '--date', help='Date in <YYYY/MM/DD> format',
+                        default='2015/05/20')
+    parser.add_argument('-o', '--outfile',
+                        help='Outputfile to write HTML data to',
+                        default=output,
+    )
+    parser.add_argument('-a', '--append', help='Appends to existing outfile',
+                        action="store_true", default=False)
+    args = parser.parse_args()
+
+    input_date = datetime.strptime(args.date, '%Y/%m/%d')
+
     agendas = grabHTML(d)
-    outputContent = ""
+    outputContent = ''.join(agendas)
     for a in agendas:
         outputContent += a
     if append:
