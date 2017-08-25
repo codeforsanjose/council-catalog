@@ -4,8 +4,10 @@
 #  written/tested using python 2.7.12
 
 import sys
+import argparse
 from bs4 import BeautifulSoup
-from datetime import date
+from datetime import date, datetime
+import dateutil.parser
 
 if sys.version_info[0] == 3:
     from urllib.request import urlopen
@@ -42,7 +44,7 @@ def grabHTML(minDate):
         for a single agenda
     """
     
-    absoluteMinDate = date(2015, 5, 20)
+    absoluteMinDate = datetime(year=2015, month=5, day=20)
     minDate = min(minDate, absoluteMinDate)
         
     print("Scraping HTML agendas from after {} ...".format(str(minDate)))
@@ -58,27 +60,28 @@ def grabHTML(minDate):
         linkTable = yearHTMLsoup.find("table", class_="telerik-reTable-2")
         for row in linkTable.find_all("tr"):
           anchor =  row.td.a
-          month = 0
-          day = 0
+          if anchor is None:
+              continue
           try:
               a_href = anchor['href']
               a_text = anchor.text
-              print('A_TEXT: ', a_text)
-              for i in range(len(MONTHS)):
-                  if a_text.startswith(MONTHS[i]):
-                      month = i+1
-                      break
-                  monthCharLength = len(MONTHS[month-1])
-                  day = int(a_text[monthCharLength+1:monthCharLength+3].rstrip(',- '))
-                        
-                  currentDate = date(year, month, day)
-                  if (currentDate > minDate):
-                      if (a_href.find("AgendaViewer") >= 0 and a_href.find(".pdf") == -1):
-                          print(str(currentDate) + ": scraping " + a_href)
-                          agendaHTMLs.append(urlopen(a_href).read())
-                      else:
-                          print("*** non-HTML agenda found: " + anchor.string + "\t" + a_href)
+              # Depend on dateutil's fuzzy parser
+              # This usually creates a reasonable date out of things.
+              meeting_date = dateutil.parser.parse(a_text, fuzzy=True)
+              if meeting_date <= minDate:
+                  continue
+            
+              if (a_href.find("AgendaViewer") >= 0 and a_href.find(".pdf") == -1):
+                  print(str(meeting_date) + ": scraping " + a_href)
+                  agendaHTMLs.append(urlopen(a_href).read())
+              else:
+                  msg = "*** non-HTML agenda found: {}\t{}"
+                  msg = msg.format(anchor.string, a_href)
+                  print(msg)
+                      
+                      
           except TypeError:
+              print('Experienced unexpected TypeError')
               pass
     
     print("\nDone!\n\n")
@@ -88,9 +91,10 @@ def grabHTML(minDate):
 #command-line usability (run ""htmlgrabber.py -h" for help, or just read below....)
 if __name__ == '__main__':
     import getopt
-    d = date(2015,5,20)
+    d = datetime(year=2015, month=5, day=20)
     append = False
     output = "htmlgrabber_output.txt"
+    
     try: 
         opts, args = getopt.getopt(sys.argv[1:],"hd:o:a")
     except getopt.GetoptError:
@@ -104,7 +108,7 @@ if __name__ == '__main__':
             year = int(arg[0:4])
             month = int(arg[5:7])
             day = int(arg[8:])
-            d = date(year, month, day)
+            d = datetime(year=year, month=month, day=day)
         elif opt == '-o':
             output = arg
         elif opt == '-a':
