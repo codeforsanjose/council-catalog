@@ -50,6 +50,7 @@ def grabHTML(minDate):
         
     print("Scraping HTML agendas from after {} ...".format(str(minDate)))
     agendaHTMLs = {}
+    meeting_type = 'city_council'
           
     for year, url in AGENDAURLS.items():
         if (year < minDate.year):
@@ -75,7 +76,10 @@ def grabHTML(minDate):
             
               if (a_href.find("AgendaViewer") >= 0 and a_href.find(".pdf") == -1):
                   print(date_str + ": scraping " + a_href)
-                  agendaHTMLs[date_str] = urlopen(a_href).read().decode('utf-8')
+                  agendaHTMLs[date_str] = {
+                      'content': urlopen(a_href).read().decode('utf-8'),
+                      'type': meeting_type,
+                      }
               else:
                   msg = "*** non-HTML agenda found: {}\t{}"
                   msg = msg.format(anchor.string, a_href)
@@ -110,14 +114,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     input_date = datetime.strptime(args.date, '%Y/%m/%d')
-    print(input_date)
 
     agendas = grabHTML(input_date)
     if append:
         with open(output, 'r') as f:
             initial_data = json.load(f)
             if not isinstance(initial_data, dict):
-                raise TypeError('Appending to none string')
+                raise TypeError('Appending to non dictionary')
             initial_data.update(agendas)
             agendas = initial_data
     with open(output, 'w') as f:
