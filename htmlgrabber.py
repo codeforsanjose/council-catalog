@@ -25,12 +25,12 @@ def grabHTML(minDate):
     if (minDate < absoluteMinDate):
         minDate = absoluteMinDate
     
-    print "Scraping HTML agendas from after", str(minDate)+"..."
+    print("Scraping HTML agendas from after", str(minDate)+"...")
     agendaHTMLs = []
     
     for year in agendaURLs.iterkeys():
         if (year >= minDate.year):
-            print "Searching " + str(year) + "..."
+            print("Searching " + str(year) + "...")
             yearHTMLsoup = BeautifulSoup(urllib2.urlopen(agendaURLs[year]).read(), "html.parser")
             linkTable = yearHTMLsoup.find("table", class_="telerik-reTable-2")
             for row in linkTable.find_all("tr"):
@@ -50,14 +50,14 @@ def grabHTML(minDate):
                     currentDate = date(year, month, day)
                     if (currentDate > minDate):
                         if (a_href.find("AgendaViewer") >= 0 and a_href.find(".pdf") == -1):
-                            print str(currentDate) + ": scraping " + a_href
+                            print(str(currentDate) + ": scraping " + a_href)
                             agendaHTMLs.append(urllib2.urlopen(a_href).read())
                         else:
-                            print "*** non-HTML agenda found: " + anchor.string + "\t" + a_href
+                            print("*** non-HTML agenda found: " + anchor.string + "\t" + a_href)
                 except TypeError:
                     pass
     
-    print "\nDone!\n\n"
+    print("\nDone!\n\n")
     return agendaHTMLs
     
 
@@ -70,15 +70,15 @@ if __name__ == '__main__':
     try: 
         opts, args = getopt.getopt(sys.argv[1:],"hd:o:a")
     except getopt.GetoptError:
-        print "Error - please use this format:\n\tpython htmlgrabber.py -d <YYYY/MM/DD> -o <outputfile.txt>"
+        print("Error - please use this format:\n\tpython htmlgrabber.py -d <YYYY/MM/DD> -o <outputfile.txt>")
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print "\nhtmlgrabber.py - command line interface\n\n\
+            print("\nhtmlgrabber.py - command line interface\n\n\
 Collects all html-based agendas from the San Jose City Council website\n\
 after the given date, and spits them out as a single, continuous text file\n\
 (raw html).\n\n\usage: htmlgrabber.py -d <YYYY/MM/DD> -o <outputfile.txt>\n\t\
--a :\tappends new HTML to the existing outputfile\n\n"
+-a :\tappends new HTML to the existing outputfile\n\n")
             sys.exit()
         elif opt == '-d':
             year = int(arg[0:4])

@@ -60,7 +60,7 @@ for listing in all_listings:
     if '<td width="3%">' not in listed_number:
         all_listings_noformat.append(listed_number)
 
-    
+
 ###### remove formatting --------------
 
 # https://stackoverflow.com/questions/6903557/splitting-on-first-occurrence
@@ -70,9 +70,9 @@ for listing in all_listings_noformat:
     listing_holder = []
     listing_holder = str(listing).split(" ", 1)
     listing_holder[0] = listing_holder[0].rstrip(', ')
-    
+
     item_holder.append(listing_holder)
-    
+
 
 ###### convert to dataframe and export as CSV
 import pandas as pd
