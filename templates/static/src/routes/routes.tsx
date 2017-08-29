@@ -3,28 +3,13 @@ import * as ReactDOM from 'react-dom'
 import {ReactStateDeclaration, UIView} from 'ui-router-react'
 import HomeComponent from '../components/helloComponent'
 import AboutComponent from '../components/aboutComponent'
-import ProjectsComponent from '../components/projectsComponent'
 import ContactComponent from '../components/contactsComponent'
-import TeamComponent from '../components/teamComponent'
 export const aboutState:ReactStateDeclaration = {
     name: 'about',
     url: '/about',
     component: AboutComponent,
     onEnter: () => {console.log("on enter")},
     onExit: () => {console.log("neat exiting see ya")}
-}
-export const teamState:ReactStateDeclaration = {
-    name: 'team',
-    url: '/team',
-    component: TeamComponent,
-    onEnter: () => {console.log("team component on enter")},
-    onExit: () => {console.log("team component neat exiting see ya")}
-}
-
-export var projectsState:ReactStateDeclaration = {
-    name: 'projects',
-    url: '/projects',
-    component: ProjectsComponent
 }
 
 export var contactState:ReactStateDeclaration = {

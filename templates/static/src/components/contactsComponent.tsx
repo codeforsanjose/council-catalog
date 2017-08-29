@@ -1,8 +1,6 @@
 import * as React from "react"
 import * as style from "ts-style"
 
-import ParallaxComponent from "./customReactParallax"
-
 
 const toggleRendering = (conditions: Boolean) => {
     const contactItemContainerCSS = {
@@ -13,7 +11,6 @@ const toggleRendering = (conditions: Boolean) => {
     if( conditions ) {
         return (
             <div>
-                <ParallaxComponent />
                 <div style={contactItemContainerCSS}>
                     To contact Joseph Richardson: <a href="mailto:jrichardson@jmstudios.net" >Send Mail</a>           
                 </div>
@@ -23,7 +20,6 @@ const toggleRendering = (conditions: Boolean) => {
     else {
         return (
             <div>
-                <ParallaxComponent />
                 <div style={contactItemContainerCSS}>
                     For consulting contact Joseph Richardson: <a href="mailto:consulting@jmstudios.net" >Send Mail Consulting</a>           
                 </div>

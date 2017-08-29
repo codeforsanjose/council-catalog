@@ -1,5 +1,4 @@
 import * as React from "react"
-import ParallaxComponent from "./customReactParallax"
 import * as style from "react-style"
 
 const mainHeaderContainer = {
@@ -18,11 +17,9 @@ class MainHeaderComponent extends React.Component<{}, MainHeaderState> {
 
         return (
             <div>
-                <ParallaxComponent />
                 <div style={mainHeaderContainer}>
-                    <h1>JMStudios</h1>
+                    <h1>Council-Catalog</h1>
                     <div>
-                        <h3>Just Making Solutions Studios</h3>
                     </div>
                 </div>
             </div>

@@ -36,7 +36,7 @@ module.exports = [{
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader']
             },
-            {
+            /*{
                 test: /\.(png|jpg|svg)$/,
                 include: __dirname + '/src/images/',
                 use: {
@@ -47,6 +47,7 @@ module.exports = [{
                     }
                 }
             }
+            */
         ]
     },
 

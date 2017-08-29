@@ -1,5 +1,4 @@
 import * as React from 'react'
-import ParallaxComponent from './customReactParallax'
 import { cardsContainer, darkCard, lightCard } from './scss/common'
 
 interface AboutProps {
@@ -13,10 +12,9 @@ class AboutComponent extends React.Component<AboutProps, {}> {
       <div style={cardsContainer()}>
         <div style={darkCard()}>
             <div style={lightCard()}>
-              JMStudios is creating projects for problems we encounter locally and some globally. From voting information to local farming. We love what we do and enjoy taking on challenging projects that software has a potential to solve.  
+              This tool is needed since currently only able to get meeting minutes by date. Council-catalog allows user to search the meetings by keyword topic.
             </div>    
         </div>
-        <ParallaxComponent />    
       </div>
     )
   }
