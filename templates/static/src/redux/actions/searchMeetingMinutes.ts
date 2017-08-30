@@ -9,7 +9,7 @@ interface SearchKeywordAction<Action> {
     payload?: any
 }
 const searchByKeyword = (keyword: string) => {
-    const url: string = 'http://localhost:5000/api/sarchKeyword/'
+    const url: string = 'http://localhost:5000/api/keyword'
     const data = {
         keyword
     }
