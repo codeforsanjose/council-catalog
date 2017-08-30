@@ -39,7 +39,7 @@
     "@types/redux": "^3.6.0",
     "@types/request": "0.0.40",
     "@types/request-promise": "^4.1.33",
-    "axios": "^0.16.1",
+    "axios": "^0.16.2",
     "body-parser": "^1.16.1",
     "cors": "^2.8.1",
     "elemental": "^0.6.1",

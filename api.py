@@ -7,5 +7,13 @@ def index():
     #return render_template('static/index.html', name='index')
     return redirect('http://localhost:8080')
 
+@app.route('/api/searchKeyword/<keyword>')
+def minutes_search_route(keyword):
+    print(searchKeyword)
+    return []
+
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+#https://github.com/dternyak/React-Redux-Flask

@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux'
-import voteSmartReducer from './voteSmartReducers'
+import SearchByKeyword from './searchByKeyword'
 
 const rootReducer = combineReducers({
-    userAddressData: voteSmartReducer
+    searchByKeyword: SearchByKeyword
 })
 
 export default rootReducer
