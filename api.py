@@ -1,6 +1,9 @@
 from flask import Flask, render_template, redirect, request, make_response
+from flask_cors import CORS
 import json
+
 app = Flask(__name__ , static_folder='templates/static', template_folder='templates')
+CORS(app)
 
 @app.route('/')
 def index():
