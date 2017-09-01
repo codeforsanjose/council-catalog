@@ -1,6 +1,8 @@
+import pandas
+import json
+
 from flask import Flask, render_template, redirect, request, make_response
 from flask_cors import CORS
-import json
 
 app = Flask(__name__ , static_folder='templates/static', template_folder='templates')
 CORS(app)
@@ -12,8 +14,9 @@ def index():
 
 @app.route('/api/keyword', methods=['POST', 'OPTIONS'])
 def minutes_search_route():
-    print('getting here')
     print(request.form)
+    minuts_from_file = pandas.read_json('./htmlgrabber_output.json')
+    import pdb; pdb.set_trace()
     return make_response(json.dumps([]))
 
 if __name__ == '__main__':

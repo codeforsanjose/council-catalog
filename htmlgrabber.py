@@ -3,100 +3,125 @@
 #
 #  written/tested using python 2.7.12
 
-import urllib2, sys
+import sys
+import json
+import argparse
 from bs4 import BeautifulSoup
-from datetime import date
+from datetime import date, datetime
+import dateutil.parser
+
+if sys.version_info[0] == 3:
+    from urllib.request import urlopen
+else:
+    # Not Python 3 - today, it is most likely to be Python 2
+    # But note that this might need an update when Python 4
+    # might be around one day
+    from urllib import urlopen
+    sys.setdefaultencoding("utf8")
 
 # fix utf8 - related encoding errors
-reload(sys)
-sys.setdefaultencoding("utf8")
+
+MONTHS = ["January", "February", "March", "April", "May",
+          "June", "July", "August", "September", "October",
+          "November", "December"]
+
+AGENDAURLS = {
+    2017:"http://www.sanjoseca.gov/index.aspx?NID=5322",
+    2016:"http://www.sanjoseca.gov/index.aspx?NID=4858",
+    2015:"http://www.sanjoseca.gov/index.aspx?NID=4535",
+}
 
 def grabHTML(minDate):
-    """Collects all HTML-based agendas from sanjoseca.gov since the specified date and outputs the raw HTML of those agendas in a list of Strings.
-    
-    Args:
-        minDate: a datetime.date object telling the function to ignore agendas with dates equal to or earlier than the given date.
-    Returns:
-        a list of Strings, each String containing all the raw HTML for a single agenda
     """
-    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-    agendaURLs = {2017:"http://www.sanjoseca.gov/index.aspx?NID=5322", 2016:"http://www.sanjoseca.gov/index.aspx?NID=4858", 2015:"http://www.sanjoseca.gov/index.aspx?NID=4535"}
-    absoluteMinDate = date(2015, 5, 20)
-    if (minDate < absoluteMinDate):
-        minDate = absoluteMinDate
-    
-    print("Scraping HTML agendas from after", str(minDate)+"...")
-    agendaHTMLs = []
-    
-    for year in agendaURLs.iterkeys():
-        if (year >= minDate.year):
-            print("Searching " + str(year) + "...")
-            yearHTMLsoup = BeautifulSoup(urllib2.urlopen(agendaURLs[year]).read(), "html.parser")
-            linkTable = yearHTMLsoup.find("table", class_="telerik-reTable-2")
-            for row in linkTable.find_all("tr"):
-                anchor =  row.td.a
-                month = 0
-                day = 0
-                try:
-                    a_href = anchor['href']
-                    a_text = anchor.text
-                    for i in range(len(months)):
-                        if a_text.startswith(months[i]):
-                            month = i+1
-                            break
-                    monthCharLength = len(months[month-1])
-                    day = int(a_text[monthCharLength+1:monthCharLength+3].rstrip(',- '))
-                        
-                    currentDate = date(year, month, day)
-                    if (currentDate > minDate):
-                        if (a_href.find("AgendaViewer") >= 0 and a_href.find(".pdf") == -1):
-                            print(str(currentDate) + ": scraping " + a_href)
-                            agendaHTMLs.append(urllib2.urlopen(a_href).read())
-                        else:
-                            print("*** non-HTML agenda found: " + anchor.string + "\t" + a_href)
-                except TypeError:
-                    pass
-    
+    Collects all HTML-based agendas from sanjoseca.gov since the
+    specified date and outputs the raw HTML of those agendas in a
+    list of Strings.
+
+    Args:
+        minDate: a datetime.date object telling the function to ignore
+        agendas with dates equal to or earlier than the given date.
+    Returns:
+        a list of Strings, each String containing all the raw HTML
+        for a single agenda
+    """
+
+    absoluteMinDate = datetime(year=2015, month=5, day=20)
+    minDate = max(minDate, absoluteMinDate)
+
+    print("Scraping HTML agendas from after {} ...".format(str(minDate)))
+    agendaHTMLs = {}
+    meeting_type = 'city_council'
+
+    for year, url in AGENDAURLS.items():
+        if (year < minDate.year):
+          continue
+        print("Searching " + str(year) + "...")
+        yearHTMLsoup = BeautifulSoup(
+            urlopen(url).read(), "html.parser",
+        )
+        linkTable = yearHTMLsoup.find("table", class_="telerik-reTable-2")
+        for row in linkTable.find_all("tr"):
+          anchor =  row.td.a
+          if anchor is None:
+              continue
+          try:
+              a_href = anchor['href']
+              a_text = anchor.text
+              # Depend on dateutil's fuzzy parser
+              # This usually creates a reasonable date out of things.
+              meeting_date = dateutil.parser.parse(a_text, fuzzy=True)
+              if meeting_date <= minDate:
+                  continue
+              date_str = str(meeting_date)
+
+              if (a_href.find("AgendaViewer") >= 0 and a_href.find(".pdf") == -1):
+                  print(date_str + ": scraping " + a_href)
+                  agendaHTMLs[date_str] = {
+                      'content': urlopen(a_href).read().decode('utf-8'),
+                      'type': meeting_type,
+                      }
+              else:
+                  msg = "*** non-HTML agenda found: {}\t{}"
+                  msg = msg.format(anchor.string, a_href)
+
+
+          except TypeError:
+              print('Experienced unexpected TypeError')
+              pass
+          except ValueError:
+              print("Experienced non-parseable date")
+              pass
+
+
     print("\nDone!\n\n")
     return agendaHTMLs
-    
 
 #command-line usability (run ""htmlgrabber.py -h" for help, or just read below....)
 if __name__ == '__main__':
     import getopt
-    d = date(2015,5,20)
+    d = datetime(year=2015, month=5, day=20)
     append = False
-    output = "htmlgrabber_output.txt"
-    try: 
-        opts, args = getopt.getopt(sys.argv[1:],"hd:o:a")
-    except getopt.GetoptError:
-        print("Error - please use this format:\n\tpython htmlgrabber.py -d <YYYY/MM/DD> -o <outputfile.txt>")
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print("\nhtmlgrabber.py - command line interface\n\n\
-Collects all html-based agendas from the San Jose City Council website\n\
-after the given date, and spits them out as a single, continuous text file\n\
-(raw html).\n\n\usage: htmlgrabber.py -d <YYYY/MM/DD> -o <outputfile.txt>\n\t\
--a :\tappends new HTML to the existing outputfile\n\n")
-            sys.exit()
-        elif opt == '-d':
-            year = int(arg[0:4])
-            month = int(arg[5:7])
-            day = int(arg[8:])
-            d = date(year, month, day)
-        elif opt == '-o':
-            output = arg
-        elif opt == '-a':
-            append = True
-    agendas = grabHTML(d)
-    outputContent = ""
-    for a in agendas:
-        outputContent += a
+    output = "htmlgrabber_output.json"
+    parser = argparse.ArgumentParser('Grab HTML content from council meetings')
+    parser.add_argument('-d', '--date', help='Date in <YYYY/MM/DD> format',
+                        default='2015/05/20')
+    parser.add_argument('-o', '--outfile',
+                        help='Outputfile to write HTML data to',
+                        default=output,
+    )
+    parser.add_argument('-a', '--append', help='Appends to existing outfile',
+                        action="store_true", default=False)
+    args = parser.parse_args()
+
+    input_date = datetime.strptime(args.date, '%Y/%m/%d')
+
+    agendas = grabHTML(input_date)
     if append:
-        f = open(output, 'a')
-    else:
-        f = open(output, 'w')
-    f.write(outputContent)
-    f.close()
-    sys.exit()
+        with open(output, 'r') as f:
+            initial_data = json.load(f)
+            if not isinstance(initial_data, dict):
+                raise TypeError('Appending to non dictionary')
+            initial_data.update(agendas)
+            agendas = initial_data
+    with open(output, 'w') as f:
+        json.dump(agendas, f)
