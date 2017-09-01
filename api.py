@@ -26,7 +26,6 @@ def minutes_search_route():
         'keyword': keyword,
         'found_meetings': meetings_found
     }
-    import pdb; pdb.set_trace()
     return make_response(json.dumps(response_data))
 
 def navigate_through_minutes_panda(keyword):

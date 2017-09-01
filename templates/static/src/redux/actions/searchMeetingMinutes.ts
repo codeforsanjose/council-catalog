@@ -16,14 +16,17 @@ const searchByKeyword = (keyword: string) => {
     return function(dispatch, getState) {
         if (keyword !== '') { 
             return postToBackend(url, data).then(function (response) {
-
+                const keywordSearchResults = {
+                    ...response.data
+                }
+                dispatch(searchKeywordSuccess(keywordSearchResults))
             }).catch(function (error) {
                   console.log(error)
             })
         }
     }
 }
-const searchKeywordSuccess = (keywordResults: any, keyword: string) => {
+const searchKeywordSuccess = (keywordResults: any) => {
     return {
         type: HANDLE_SEARCH_KEYWORD,
         payload: keywordResults

@@ -5,8 +5,14 @@ import { bindActionCreators } from 'redux'
 import { searchByKeyword } from '../redux/actions/searchMeetingMinutes'
 import store from "../redux/store/store"
 
+interface Meeting {
+    timestamp: string,
+    meeting_content: string
+}
+
 interface SearchByKeywordState {
-    keyword: string
+    keyword: string,
+    found_meetings: Array<Meeting>
 }
 interface SearchByKeywordProps {
     fetchSearchByKeyword: any
@@ -26,7 +32,8 @@ class SearchByKeywordComponent extends React.Component<SearchByKeywordProps, Sea
     constructor(props) {
         super(props)
         this.state = {
-            keyword: ''
+            keyword: '',
+            found_mettings: []
         }
     }
     handleSearchByKeyword(event: React.MouseEvent<HTMLButtonElement>) {
@@ -47,6 +54,7 @@ class SearchByKeywordComponent extends React.Component<SearchByKeywordProps, Sea
     render() {
         return (
             <div>
+                {console.log(this.state)}
                 <input 
                     type='text' 
                     placeholder='Address'
@@ -62,15 +70,14 @@ class SearchByKeywordComponent extends React.Component<SearchByKeywordProps, Sea
     }
     componentWillReceiveProps(newProps) {
         this.setState({
-            ...newProps.searchByKeywordResults
+            ...newProps
         })
-        console.log(this.state)
     }
 }
 const mapStateToProps = (state) => {
-        return {
-                    ...state
-                }
+    return {
+        ...state.searchByKeyword
+    }
 }
 const mapDispatchToProps = (dispatch) => {
     return {
