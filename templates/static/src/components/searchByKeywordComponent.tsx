@@ -3,12 +3,9 @@ import { connect } from 'react-redux'
 import * as style from 'ts-style' //ts-style is correct one
 import { bindActionCreators } from 'redux'
 import { searchByKeyword } from '../redux/actions/searchMeetingMinutes'
-import store from "../redux/store/store"
-
-interface Meeting {
-    timestamp: string,
-    meeting_content: string
-}
+import store from '../redux/store/store'
+import { Meeting } from './types/types'
+import displayMeeting from './displayMeeting'
 
 interface SearchByKeywordState {
     keyword: string,
@@ -27,13 +24,21 @@ const keywordInput = () => {
     })
 }
 
+const foundMeetingsContainer = () => {
+    return style.create({
+        margin: '10px',
+        textAlign: 'center',
+        width: '600px',
+    })
+}
+
 
 class SearchByKeywordComponent extends React.Component<SearchByKeywordProps, SearchByKeywordState> {
     constructor(props) {
         super(props)
         this.state = {
             keyword: '',
-            found_mettings: []
+            found_meetings: []
         }
     }
     handleSearchByKeyword(event: React.MouseEvent<HTMLButtonElement>) {
@@ -65,6 +70,13 @@ class SearchByKeywordComponent extends React.Component<SearchByKeywordProps, Sea
                 >
                 Submit for info
                 </button>
+                <div style={foundMeetingsContainer()}>
+                    {
+                        this.state.found_meetings.map( (meeting: Meeting, index: number) => {
+                            return displayMeeting(meeting, index)
+                        })
+                    }
+                </div>
             </div>
         )
     }
