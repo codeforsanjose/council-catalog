@@ -50,6 +50,8 @@ def grabHTML(minDate):
 
     print("Scraping HTML agendas from after {} ...".format(str(minDate)))
     agendaHTMLs = {}
+
+    # NOTE JMS: what other meeting types are there?
     meeting_type = 'city_council'
 
     for year, url in AGENDAURLS.items():
@@ -84,8 +86,9 @@ def handle_tables_beautifulsoup_parser(linkTable, agendaHTMLs, minDate, meeting_
             # NOTE JMS: does this go through the pdf links on each meeting?
             if (a_href.find("AgendaViewer") >= 0 and a_href.find(".pdf") == -1):
                 print(date_str + ": scraping " + a_href)
+                content_to_search = handle_pdf_found(a_href)
                 agendaHTMLs[date_str] = {
-                    'content': urlopen(a_href).read().decode('utf-8'),
+                    'content': content_to_search,
                     'type': meeting_type,
                 }
             else:
@@ -99,6 +102,16 @@ def handle_tables_beautifulsoup_parser(linkTable, agendaHTMLs, minDate, meeting_
         except ValueError:
             print("Experienced non-parseable date")
             pass
+
+def handle_pdf_found(pdf_url):
+    pdfHTMLsoup = BeautifulSoup(
+        urlopen(pdf_url).read(), "html.parser",
+    )
+    td_contents = [t.text for t in  pdfHTMLsoup.find_all('td')]
+    p_contents = [p.text for p in pdfHTMLsoup.find_all('p')]
+    all_p_string = ' '.join(p_contents)
+    all_td_string = ' '.join(td_contents)
+    return all_p_string + all_td_string
 
 #command-line usability (run ""htmlgrabber.py -h" for help, or just read below....)
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
 import pandas
 import json
+import calendar
 
 from flask import Flask, render_template, redirect, request, make_response
 from flask_cors import CORS
@@ -38,9 +39,11 @@ def navigate_through_minutes_panda(keyword):
 
 def search_through_content(keyword, timestamp_key):
     content_to_search = minutes_from_file[timestamp_key]['content']
+    pretty_date = timestamp_key.strftime('%B %d, %Y')
+
     if keyword in content_to_search:
         return {
-            'timestamp': str(timestamp_key),
+            'timestamp': pretty_date,
             'meeting_content': content_to_search
         }
     else:
