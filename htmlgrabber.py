@@ -59,42 +59,46 @@ def grabHTML(minDate):
         yearHTMLsoup = BeautifulSoup(
             urlopen(url).read(), "html.parser",
         )
+        # NOTE JMS: start of the beautiful soup parser currently only reading tables and tr
         linkTable = yearHTMLsoup.find("table", class_="telerik-reTable-2")
-        for row in linkTable.find_all("tr"):
-          anchor =  row.td.a
-          if anchor is None:
-              continue
-          try:
-              a_href = anchor['href']
-              a_text = anchor.text
-              # Depend on dateutil's fuzzy parser
-              # This usually creates a reasonable date out of things.
-              meeting_date = dateutil.parser.parse(a_text, fuzzy=True)
-              if meeting_date <= minDate:
-                  continue
-              date_str = str(meeting_date)
-
-              if (a_href.find("AgendaViewer") >= 0 and a_href.find(".pdf") == -1):
-                  print(date_str + ": scraping " + a_href)
-                  agendaHTMLs[date_str] = {
-                      'content': urlopen(a_href).read().decode('utf-8'),
-                      'type': meeting_type,
-                      }
-              else:
-                  msg = "*** non-HTML agenda found: {}\t{}"
-                  msg = msg.format(anchor.string, a_href)
-
-
-          except TypeError:
-              print('Experienced unexpected TypeError')
-              pass
-          except ValueError:
-              print("Experienced non-parseable date")
-              pass
-
+        handle_tables_beautifulsoup_parser(linkTable, agendaHTMLs, minDate, meeting_type)
 
     print("\nDone!\n\n")
     return agendaHTMLs
+
+def handle_tables_beautifulsoup_parser(linkTable, agendaHTMLs, minDate, meeting_type):
+    for row in linkTable.find_all("tr"):
+        anchor =  row.td.a
+        if anchor is None:
+            continue
+        try:
+            a_href = anchor['href']
+            a_text = anchor.text
+            # Depend on dateutil's fuzzy parser
+            # This usually creates a reasonable date out of things.
+            meeting_date = dateutil.parser.parse(a_text, fuzzy=True)
+            if meeting_date <= minDate:
+                continue
+            date_str = str(meeting_date)
+
+            # NOTE JMS: does this go through the pdf links on each meeting?
+            if (a_href.find("AgendaViewer") >= 0 and a_href.find(".pdf") == -1):
+                print(date_str + ": scraping " + a_href)
+                agendaHTMLs[date_str] = {
+                    'content': urlopen(a_href).read().decode('utf-8'),
+                    'type': meeting_type,
+                }
+            else:
+                msg = "*** non-HTML agenda found: {}\t{}"
+                msg = msg.format(anchor.string, a_href)
+
+
+        except TypeError:
+            print('Experienced unexpected TypeError')
+            pass
+        except ValueError:
+            print("Experienced non-parseable date")
+            pass
 
 #command-line usability (run ""htmlgrabber.py -h" for help, or just read below....)
 if __name__ == '__main__':
