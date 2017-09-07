@@ -66,7 +66,5 @@ if __name__ == '__main__':
             input_html = meeting['content']
             dict_content = parse_content(input_html=input_html)
             output[date] = dict_content
-            print(date)
-            break
     with open(outfile, 'w') as f:
         json.dump(output, f)
