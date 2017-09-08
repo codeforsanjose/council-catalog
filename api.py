@@ -38,9 +38,9 @@ def navigate_through_minutes_panda(keyword):
     return meeting_minutes_with_keyword
 
 def search_through_content(keyword, timestamp_key):
-    content_to_search = minutes_from_file[timestamp_key]['content']
+    content_to_search = minutes_from_file[timestamp_key]['content'].lower()
     pretty_date = timestamp_key.strftime('%B %d, %Y')
-
+    keyword = keyword.lower()
     if keyword in content_to_search:
         return {
             'timestamp': pretty_date,

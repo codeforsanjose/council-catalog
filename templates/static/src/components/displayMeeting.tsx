@@ -1,5 +1,6 @@
 import * as React from 'react'
 
+import { overflow } from './scss/common'
 import { Meeting } from './types/types'
 
 const displayMeeting = (meeting: Meeting, key: number) => {
@@ -20,7 +21,9 @@ const displayMeeting = (meeting: Meeting, key: number) => {
         return {
             fontSize: '16px',
             display: 'block',
-            textAlign: 'left'
+            textAlign: 'left',
+            height: '300px',
+            overflowY: 'scroll' as overflow
         }
     }
     return (

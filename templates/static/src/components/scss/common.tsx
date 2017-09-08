@@ -2,6 +2,7 @@ import * as style from 'ts-style'
 type positionTypes =  'fixed' | 'initial' | 'inherit' | 'unset' | 'relative' | 'static' | 'absolute' | 'sticky'
 type fontWeightTypes = 'initial' | 'inherit' | 'unset' | 'bold' | 'normal' | 'bolder' | 'lighter' | 100 | 200 | 300 | 400
 type attachments = 'fixed'| 'initial'| 'inherit'| 'unset'| 'scroll'| 'local'
+type overflow = 'initial' | 'inherit' | 'unset' | 'scroll' | 'auto' | 'scroll' | 'hidden' | 'visible'
 
 const cardsContainer = () => {
     return style.create({
@@ -38,5 +39,6 @@ export {
     cardsContainer,
     positionTypes,
     fontWeightTypes,
-    attachments
+    attachments,
+    overflow
 }

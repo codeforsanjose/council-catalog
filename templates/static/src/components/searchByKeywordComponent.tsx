@@ -71,6 +71,7 @@ class SearchByKeywordComponent extends React.Component<SearchByKeywordProps, Sea
                 Submit for info
                 </button>
                 <div style={foundMeetingsContainer()}>
+                    <div><h3>{this.state.found_meetings.length} Found meetings</h3></div>
                     {
                         this.state.found_meetings.map( (meeting: Meeting, index: number) => {
                             return displayMeeting(meeting, index)
