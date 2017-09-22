@@ -22,5 +22,6 @@ PyYAML==3.12
 six==1.10.0
 virtualenv==15.1.0
 Werkzeug==0.12.2
+lxml==3.8.0
 pandas==0.20.3
 python-dateutil==2.6.1

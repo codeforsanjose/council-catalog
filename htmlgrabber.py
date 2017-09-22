@@ -58,9 +58,8 @@ def grabHTML(minDate):
         if (year < minDate.year):
           continue
         print("Searching " + str(year) + "...")
-        yearHTMLsoup = BeautifulSoup(
-            urlopen(url).read(), "html.parser",
-        )
+        yearHTMLsoup = BeautifulSoupThis(url)
+
         # NOTE JMS: start of the beautiful soup parser currently only reading tables and tr
         linkTable = yearHTMLsoup.find("table", class_="telerik-reTable-2")
         handle_tables_beautifulsoup_parser(linkTable, agendaHTMLs, minDate, meeting_type)
@@ -68,13 +67,30 @@ def grabHTML(minDate):
     print("\nDone!\n\n")
     return agendaHTMLs
 
+def BeautifulSoupThis(url):
+    return BeautifulSoup(
+        urlopen(url).read(), "html.parser",
+    )
+
 def handle_tables_beautifulsoup_parser(linkTable, agendaHTMLs, minDate, meeting_type):
     for row in linkTable.find_all("tr"):
+        import pdb; pdb.set_trace()
         anchor =  row.td.a
         if anchor is None:
             continue
         try:
             a_href = anchor['href']
+            bs4_legistar_page = BeautifulSoupThis(a_href)
+
+
+            # since new legislar layer now need to bs4 this a_href
+
+
+
+
+
+
+
             a_text = anchor.text
             # Depend on dateutil's fuzzy parser
             # This usually creates a reasonable date out of things.
@@ -83,7 +99,6 @@ def handle_tables_beautifulsoup_parser(linkTable, agendaHTMLs, minDate, meeting_
                 continue
             date_str = str(meeting_date)
 
-            # NOTE JMS: does this go through the pdf links on each meeting?
             if (a_href.find("AgendaViewer") >= 0 and a_href.find(".pdf") == -1):
                 print(date_str + ": scraping " + a_href)
                 content_to_search = handle_pdf_found(a_href)

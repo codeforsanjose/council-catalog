@@ -1,6 +1,8 @@
+import re
 import json
 import argparse
-from bs4 import BeautifulSoup
+import lxml.html
+from collections import defaultdict
 
 
 def parse_content(input_html):
@@ -8,29 +10,42 @@ def parse_content(input_html):
     Given some content from a city council meeting,
     extract useful content.
     """
-    soup = BeautifulSoup(input_html, 'html.parser')
-    output = {}
-    for table in soup.find_all('table'):
-        numberspace = table.find_next('td')
-        number_header = numberspace.text
-        textspace = numberspace.find_next('td')
-        text_header = textspace.text.split('\n')[0]
-        blockquotes = table.find_all_next('blockquote')
-        if not blockquotes:
+    root = lxml.html.fromstring(input_html)
+    output = defaultdict(dict)
+    current_key = None
+    previous_was_key = False
+
+
+    for x in root.xpath('//div | //td'):
+        text = x.text
+        if text in ('None', None):
             continue
-        block_text = [blockquote.text for blockquote in blockquotes]
-        if not number_header or not text_header or not block_text:
-            # Nothing to do here
-            continue
-        output[number_header] = {
-            'title': text_header,
-            'block_content': block_text
-        }
+        text = text.lstrip().rstrip()
+        match = re.match('\d+.\d*', text)
+        if not match and current_key:
+            if x.tag == 'td' and previous_was_key:
+                output[current_key]['header'].append(text)
+            else:
+                output[current_key]['content'].append(text)
+        elif match:
+            # Grab what matched the regex.
+            # That should be a number with a decimal
+            # Such as 5.1 or 2.
+            # It should also start the string.
+            # This should be seen as the seciton number.
+            current_key = match.group(0)
+            output[current_key] = {
+                'content': [],
+                'header': [],
+            }
 
-    return output
+        if match:
+            previous_was_key = True
+        else:
+            previous_was_key = False
 
-    
-
+    return output            
+            
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(
@@ -47,6 +62,7 @@ if __name__ == '__main__':
     with open(infile, 'r') as f:
         data = json.load(f)
         for date, meeting in data.items():
+            print(meeting.keys())
             input_html = meeting['content']
             dict_content = parse_content(input_html=input_html)
             output[date] = dict_content
