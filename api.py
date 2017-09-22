@@ -25,7 +25,7 @@ def minutes_search_route():
     meetings_found = navigate_through_minutes_panda(keyword)
     response_data = {
         'keyword': keyword,
-        'found_meetings': meetings_found
+        'found_meetings': meetings_found[::-1]
     }
     return make_response(json.dumps(response_data))
 
